@@ -39,20 +39,14 @@ jobs:
             sudo usermod -aG docker $USER
           fi
 
-          # Install Docker Compose plugin if not installed
-          if ! command -v docker-compose &> /dev/null && ! docker compose version &> /dev/null
-          then
-            sudo apt-get install -y docker-compose-plugin
+          # Install Docker Compose v2 (standalone binary)
+          if ! command -v docker-compose &> /dev/null; then
+            DOCKER_COMPOSE_VERSION="2.29.2"
+            sudo curl -L "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
           fi
 
-          # Use "docker compose" if available, else fallback to "docker-compose"
           cd ~/jul-14
-          if command -v docker compose &> /dev/null; then
-            docker compose pull || true
-            docker compose down || true
-            docker compose up -d --build
-          else
-            docker-compose pull || true
-            docker-compose down || true
-            docker-compose up -d --build
-          fi
+          docker-compose pull || true
+          docker-compose down || true
+          docker-compose up -d --build
